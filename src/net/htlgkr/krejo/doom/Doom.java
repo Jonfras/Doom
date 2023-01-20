@@ -1,5 +1,8 @@
 package net.htlgkr.krejo.doom;
 
+import net.htlgkr.krejo.doom.enemies.Enemy;
+import net.htlgkr.krejo.doom.weapons.Sword;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -12,9 +15,9 @@ public class Doom {
 
     private static final int NUMBER_OF_ENEMIES = 5;
 
-    private static Player player = new Player(1, 10, 0.5D, 42);
+    private static Player player = new Player(1, new Sword("Starter-Sword", 4), 0.5D, 42);
 
-    private static final int xLENGTH = 40;
+    private static final int WIDTH = 40;
     private static final int yLENGTH = 17;
 
     private static final int N = -41;
@@ -93,28 +96,26 @@ public class Doom {
     }
 
     private static void fight() throws RuntimeException {
-        int playerX = (int) Math.floor(player.getIndex() % 40);
-        int playerY = (int) Math.floor(player.getIndex() / 40);
-        System.out.println(player.getIndex() + " " + playerY + "y und " + playerX);
+        int playerX = (int) Math.floor(player.getIndex() % WIDTH);
+        int playerY = (int) Math.floor(player.getIndex() / WIDTH);
         for (int i = 0; i < enemies.size(); i++) {
             Enemy enemy = enemies.get(i);
             if (enemy.getIndex() / 40 - playerY < 2 && enemy.getIndex() / 40 - playerY > -2 ||
                     enemy.getIndex() % 40 - playerX < 2 && enemy.getIndex() % 40 - playerX > -2){
-                enemy.setHp(player.getDamage());
+                enemy.setHp(player.getWeapon().getDamage());
                 if (enemy.getHp() < 1){
                     enemies.remove(i);
                     char[] playfieldArr = playfield.toCharArray();
                     playfieldArr[enemy.getIndex()] = SPACE;
                     playfield = String.valueOf(playfieldArr);
                 } else {
-                    player.setHp(enemy.getDamage());
+                    player.setHp(enemy.getWeapon().getDamage());
                     if (player.getHp() < 1){
                         loose();
                     }
                 }
             }
         }
-//            System.out.println(enemy.getIndex() + ": " + enemy.getIndex() / 40 + "y und " + enemy.getIndex() % 40);
     }
 
 

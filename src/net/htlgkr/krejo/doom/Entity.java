@@ -1,19 +1,24 @@
 package net.htlgkr.krejo.doom;
 
-public abstract class Entity {
-    private double hp;
-    private int damage;
-    private double armor;
+import net.htlgkr.krejo.doom.enemies.Enemy;
+import net.htlgkr.krejo.doom.weapons.Weapon;
 
-    public Entity(double hp, int damage, double armor) {
+public sealed abstract class Entity permits Enemy, Player {
+    protected double hp;
+    protected Weapon weapon;
+    protected double armor;
+    protected char symbol;
+
+    public Entity(double hp, Weapon weapon, double armor, char symbol) {
         this.hp = hp;
-        this.damage = damage;
+        this.weapon = weapon;
         this.armor = armor;
+        this.symbol = symbol;
     }
 
     public Entity(){
-        hp = 100;
-        damage = 100;
+        hp = 10;
+        weapon = new Weapon("dummy_weapon", 1);
         armor = 1;
     }
 
@@ -25,12 +30,12 @@ public abstract class Entity {
         this.hp = this.hp - takenDamage * armor;
     }
 
-    public int getDamage() {
-        return damage;
+    public Weapon getWeapon() {
+        return weapon;
     }
 
-    public void setDamage(int damage) {
-        this.damage = damage;
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
     }
 
     public double getArmor() {

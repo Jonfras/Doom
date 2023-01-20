@@ -1,13 +1,15 @@
 package net.htlgkr.krejo.doom;
 
-public class Player extends Entity{
+import net.htlgkr.krejo.doom.weapons.Weapon;
+
+public final class Player extends Entity{
 
     public static final char SYMBOL = '@';
 
     private int index;
 
-    public Player(double hp, int damage, double armor, int index) {
-        super(hp, damage, armor);
+    public Player(double hp, Weapon weapon, double armor, int index) {
+        super(hp, weapon, armor);
         this.index = index;
     }
 
