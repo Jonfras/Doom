@@ -1,12 +1,11 @@
 package net.htlgkr.krejo.doom;
 
+import net.htlgkr.krejo.doom.enemies.Dwarf;
 import net.htlgkr.krejo.doom.enemies.Enemy;
+import net.htlgkr.krejo.doom.enemies.Player;
 import net.htlgkr.krejo.doom.weapons.Sword;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class Doom {
 
@@ -17,8 +16,10 @@ public class Doom {
 
     private static Player player = new Player(1, new Sword("Starter-Sword", 4), 0.5D, 42);
 
+    private static final List<Enemy> enemyList = new ArrayList<>();
+
     private static final int WIDTH = 40;
-    private static final int yLENGTH = 17;
+    private static final int LENGTH = 17;
 
     private static final int N = -41;
     private static final int NE = -40;
@@ -129,7 +130,7 @@ public class Doom {
         playfieldArr[playerIndex] = SPACE;
         player.setIndex(nextMove.getIndexOfPosition());
 
-        playfieldArr = moveEnemies(playfieldArr);
+        playfieldArr = Arrays.copyOf(moveEnemies(playfieldArr), WIDTH*LENGTH);
 
         playfield = String.valueOf(playfieldArr);
 

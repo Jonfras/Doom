@@ -1,6 +1,5 @@
-package net.htlgkr.krejo.doom;
+package net.htlgkr.krejo.doom.enemies;
 
-import net.htlgkr.krejo.doom.enemies.Enemy;
 import net.htlgkr.krejo.doom.weapons.Weapon;
 
 public sealed abstract class Entity permits Enemy, Player {

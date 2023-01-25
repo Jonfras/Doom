@@ -1,13 +1,10 @@
 package net.htlgkr.krejo.doom.enemies;
 
-import net.htlgkr.krejo.doom.Entity;
-import net.htlgkr.krejo.doom.enemies.Dwarf;
-import net.htlgkr.krejo.doom.enemies.Elf;
-import net.htlgkr.krejo.doom.enemies.Rouge;
-import net.htlgkr.krejo.doom.enemies.Wizard;
+import net.htlgkr.krejo.doom.enemies.Entity;
+import net.htlgkr.krejo.doom.enemies.*;
 import net.htlgkr.krejo.doom.weapons.Weapon;
 
-public sealed class Enemy extends Entity permits Rouge, Wizard, Dwarf, Elf {
+public sealed abstract class Enemy extends Entity  permits Rouge, Wizard, Dwarf, Elf {
 
 
 
@@ -29,4 +26,5 @@ public sealed class Enemy extends Entity permits Rouge, Wizard, Dwarf, Elf {
     public void setIndex(int index) {
         this.index = index;
     }
+
 }
