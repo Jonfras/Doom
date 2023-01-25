@@ -1,0 +1,18 @@
+weapons:
+Bow: Range
+Claw: nothing
+Dagger: multiple attacks in one turn
+Hammer: breaks armor
+Sword: half damage against sword
+Wand: can only be used by wizards and ignores armor
+Elfbar: Geschmack
+
+
+
+
+enemies:
+Dwarf: can use sword, hammer			        	Symbol: D
+Elf: uses Claw or Elfbar			            	Symbol: E
+HardWizard: ?						                Symbol: H
+Rouge: only can use Claw but moves two squares		Symbol: R
+UndeadWizard: uses wand				            	Symbol: U

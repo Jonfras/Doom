@@ -2,7 +2,7 @@ package net.htlgkr.krejo.doom.weapons;
 
 import net.htlgkr.krejo.doom.weapons.*;
 
-public sealed class Weapon permits Sword, Bow, Dagger, Wand, Hammer, Claw{
+public sealed class Weapon permits Sword, Bow, Dagger, Wand, Hammer, Claw, Elfbar{
     protected String description;
     protected int damage;
 
