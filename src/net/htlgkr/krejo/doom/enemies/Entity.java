@@ -16,7 +16,7 @@ public sealed abstract class Entity permits Enemy, Player {
     }
 
     public Entity(){
-        hp = 10;
+        hp = 1;
         weapon = new Weapon("dummy_weapon", 1);
         armor = 1;
     }

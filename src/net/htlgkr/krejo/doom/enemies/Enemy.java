@@ -14,6 +14,10 @@ public sealed abstract class Enemy extends Entity  permits Rouge, Wizard, Dwarf,
         super(hp, weapon, armor, symbol);
     }
 
+    public Enemy(){
+
+    }
+
     public Enemy(int index){
         super();
         this.index = index;

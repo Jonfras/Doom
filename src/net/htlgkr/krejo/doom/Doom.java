@@ -1,6 +1,6 @@
 package net.htlgkr.krejo.doom;
 
-import net.htlgkr.krejo.doom.enemies.Dwarf;
+import net.htlgkr.krejo.doom.enemies.Difficulty;
 import net.htlgkr.krejo.doom.enemies.Enemy;
 import net.htlgkr.krejo.doom.enemies.Player;
 import net.htlgkr.krejo.doom.weapons.Sword;
@@ -8,18 +8,30 @@ import net.htlgkr.krejo.doom.weapons.Sword;
 import java.util.*;
 
 public class Doom {
+//Playfield Werte
+    private static final int WIDTH = 40;
+    private static final int LENGTH = 17;
+    private static final int HIGHEST_INDEX = 679;
 
-    //Schwierigkeitsgrad zurzeit: unmöglich
+    private static final char PLAYER = '@';
+    private static final char ENEMY = 'X';
+    private static final char SPACE = ' ';
+    private static final char TREASURE = 'S';
+    private static final char BONUS = "B";
+
+    private static Difficulty difficulty;
+
     private static String playfield;
 
     private static final int NUMBER_OF_ENEMIES = 5;
 
     private static Player player = new Player(1, new Sword("Starter-Sword", 4), 0.5D, 42);
 
-    private static final List<Enemy> enemyList = new ArrayList<>();
+    private static final List<Enemy> enemyList = spawnEntities();
 
-    private static final int WIDTH = 40;
-    private static final int LENGTH = 17;
+
+
+
 
     private static final int N = -41;
     private static final int NE = -40;
@@ -47,12 +59,7 @@ public class Doom {
 
     private static List<Enemy> enemies = new ArrayList<>(NUMBER_OF_ENEMIES);
 
-    private static final char PLAYER = '@';
-    private static final char ENEMY = 'X';
-    private static final String WALL = "#";
-    private static final char SPACE = ' ';
-    private static final char TREASURE = 'S';
-    private static final String BONUS = "B";
+    
 
     private static final Scanner systemScanner = new Scanner(System.in);
 
@@ -60,6 +67,7 @@ public class Doom {
 
 
     public static void main(String[] args) {
+        selectDifficulty();
         createPlayfield();
         showActions();
         System.out.println(playfield);
@@ -118,9 +126,6 @@ public class Doom {
             }
         }
     }
-
-
-
 
     private static void rewritePlayfield(MoveToPosition nextMove) {
         int playerIndex = playfield.indexOf(PLAYER);
@@ -239,19 +244,17 @@ public class Doom {
         System.out.println("F....Fight");
     }
 
-    private static void spawnEnemies() {
+    private static List<Enemy> spawnEntities() {
         Random r = new Random();
-        char[] playfieldArr = playfield.toCharArray();
-        for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
-            int random = r.nextInt(playfield.length());
-            if (playfieldArr[random] == SPACE) {
-                enemies.add(new Enemy(random));
-                playfieldArr[random] = ENEMY;
-            } else {
-                i--;
+        while (true){
+            int bonus = r.nextInt(HIGHEST_INDEX);
+            if (playfield.charAt(index) == ' '){
+                replaceChar(BONUS, index);
+                break;
             }
         }
-        playfield = String.valueOf(playfieldArr);
+
+        return null;
     }
 
 
@@ -269,12 +272,26 @@ public class Doom {
                 #                                      #
                 # #### #### #### #### ############## # #
                 # #    #    #    #    #         #    # #
-                # ###  #### ###  #### #  B      ###### #
+                # ###  #### ###  #### #         ###### #
                 # #    #    #    #    #         #    # #
                 # #### #    #### #    ####      ###### #
                 # #    #         #    #    S           #
                 ########################################
                 """;
-        spawnEnemies();
+
+    }
+
+    private static void selectDifficulty() {
+        DifficultyFactory df = new DifficultyFactory();
+        do {
+            System.out.println("Select a difficulty between 1 and 3");
+            int dif = Integer.parseInt(systemScanner.next());
+            difficulty= df.getDifficulty(dif);
+
+        }while (difficulty == null);
+    }
+    
+    private static void replaceChar(char symbol, int index){
+        playfield = String.valueOf(playfield.toCharArray()[index] = symbol);
     }
 }

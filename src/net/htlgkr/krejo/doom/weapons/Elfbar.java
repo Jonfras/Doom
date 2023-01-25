@@ -6,4 +6,5 @@ public final class Elfbar extends Weapon {
         super(description, damage);
     }
 
+
 }

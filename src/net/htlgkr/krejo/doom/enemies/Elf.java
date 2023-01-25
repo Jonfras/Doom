@@ -6,4 +6,5 @@ public final class Elf extends Enemy {
     public Elf(double hp, Weapon weapon, double armor) {
         super(hp, weapon, armor, 'D');
     }
+
 }
