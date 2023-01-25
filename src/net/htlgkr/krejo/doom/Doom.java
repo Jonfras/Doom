@@ -1,24 +1,26 @@
 package net.htlgkr.krejo.doom;
 
-import net.htlgkr.krejo.doom.enemies.Difficulty;
-import net.htlgkr.krejo.doom.enemies.Enemy;
-import net.htlgkr.krejo.doom.enemies.Player;
+import net.htlgkr.krejo.doom.enemies.*;
 import net.htlgkr.krejo.doom.weapons.Sword;
 
 import java.util.*;
 
 public class Doom {
-//Playfield Werte
-    private static final int WIDTH = 40;
-    private static final int LENGTH = 17;
-    private static final int HIGHEST_INDEX = 679;
+
+    //TODO: FIGHT MOCHA DASS GEHT
+
+    //Playfield Werte
+    private static final int WIDTH = 39;
+    private static final int LENGTH = 16;
+    private static final int HIGHEST_INDEX = 639;
 
     private static final char PLAYER = '@';
     private static final char ENEMY = 'X';
     private static final char SPACE = ' ';
     private static final char TREASURE = 'S';
-    private static final char BONUS = "B";
+    private static final char BONUS = 'B';
 
+    static GameFactory gameFactory = new GameFactory();
     private static Difficulty difficulty;
 
     private static String playfield;
@@ -27,20 +29,17 @@ public class Doom {
 
     private static Player player = new Player(1, new Sword("Starter-Sword", 4), 0.5D, 42);
 
-    private static final List<Enemy> enemyList = spawnEntities();
+    private static final Enemy[] enemyTypes = {new Dwarf(), new Elf(), new HardWizard(), new UndeadWizard(), new Rouge()};
 
 
-
-
-
-    private static final int N = -41;
-    private static final int NE = -40;
+    private static final int N = -1 * (WIDTH + 1);
+    private static final int NE = -1 * WIDTH;
     private static final int E = 1;
-    private static final int SE = 42;
-    private static final int S = 41;
-    private static final int SW = 40;
+    private static final int SE = WIDTH + 2;
+    private static final int S = WIDTH + 1;
+    private static final int SW = WIDTH;
     private static final int W = -1;
-    private static final int NW = -42;
+    private static final int NW = -1 * (WIDTH + 2);
 
     private static final List<Integer> values = new ArrayList<>(List.of(NW, N, NE, E, SE, S, SW, W));
 
@@ -59,7 +58,6 @@ public class Doom {
 
     private static List<Enemy> enemies = new ArrayList<>(NUMBER_OF_ENEMIES);
 
-    
 
     private static final Scanner systemScanner = new Scanner(System.in);
 
@@ -85,7 +83,7 @@ public class Doom {
                     moveCounter++;
                 } catch (IllegalStateException e) {
                     System.err.println("Please enter a valid move");
-                } catch (RuntimeException r){
+                } catch (RuntimeException r) {
                     System.err.println("No one wants to fight");
                 }
             }
@@ -110,16 +108,16 @@ public class Doom {
         for (int i = 0; i < enemies.size(); i++) {
             Enemy enemy = enemies.get(i);
             if (enemy.getIndex() / 40 - playerY < 2 && enemy.getIndex() / 40 - playerY > -2 ||
-                    enemy.getIndex() % 40 - playerX < 2 && enemy.getIndex() % 40 - playerX > -2){
+                    enemy.getIndex() % 40 - playerX < 2 && enemy.getIndex() % 40 - playerX > -2) {
                 enemy.setHp(player.getWeapon().getDamage());
-                if (enemy.getHp() < 1){
+                if (enemy.getHp() < 1) {
                     enemies.remove(i);
                     char[] playfieldArr = playfield.toCharArray();
                     playfieldArr[enemy.getIndex()] = SPACE;
                     playfield = String.valueOf(playfieldArr);
                 } else {
                     player.setHp(enemy.getWeapon().getDamage());
-                    if (player.getHp() < 1){
+                    if (player.getHp() < 1) {
                         loose();
                     }
                 }
@@ -128,16 +126,12 @@ public class Doom {
     }
 
     private static void rewritePlayfield(MoveToPosition nextMove) {
-        int playerIndex = playfield.indexOf(PLAYER);
-        char[] playfieldArr = playfield.toCharArray();
 
-        playfieldArr[nextMove.getIndexOfPosition()] = PLAYER;
-        playfieldArr[playerIndex] = SPACE;
+        moveChar(PLAYER, nextMove.getIndexOfPosition(), playfield.indexOf(PLAYER));
+
         player.setIndex(nextMove.getIndexOfPosition());
 
-        playfieldArr = Arrays.copyOf(moveEnemies(playfieldArr), WIDTH*LENGTH);
-
-        playfield = String.valueOf(playfieldArr);
+        moveEnemies(playfield.toCharArray());
 
     }
 
@@ -187,11 +181,9 @@ public class Doom {
             if (nextPosition.getValueOfPosition() == 'F' || nextPosition.getValueOfPosition() == SPACE) {
                 nextPosition.setValidMove(true);
                 return nextPosition;
-            }
-            else if (nextPosition.getValueOfPosition() == TREASURE){
+            } else if (nextPosition.getValueOfPosition() == TREASURE) {
                 win();
-            }
-                else {
+            } else {
                 nextPosition.setValidMove(false);
                 return nextPosition;
             }
@@ -216,11 +208,11 @@ public class Doom {
     private static char[] moveEnemies(char[] playfieldArr) {
         for (int i = 0; i < enemies.size(); i++) {
             Random r = new Random();
-            int randomInt = r.nextInt(8);
-            int nextIndex = enemies.get(i).getIndex() + values.get(randomInt);
+            int randomInt = r.nextInt(7);
+            Enemy enemy = enemies.get(i);
+            int nextIndex = enemy.getIndex() + values.get(randomInt);
             if (playfieldArr[nextIndex] == SPACE) {
-                playfieldArr[nextIndex] = ENEMY;
-                playfieldArr[enemies.get(i).getIndex()] = SPACE;
+                moveChar(enemy.getSymbol(), nextIndex, enemy.getIndex());
                 enemies.get(i).setIndex(nextIndex);
             } else {
                 i--;
@@ -244,54 +236,78 @@ public class Doom {
         System.out.println("F....Fight");
     }
 
-    private static List<Enemy> spawnEntities() {
+    private static void spawnEntities() {
         Random r = new Random();
-        while (true){
-            int bonus = r.nextInt(HIGHEST_INDEX);
-            if (playfield.charAt(index) == ' '){
-                replaceChar(BONUS, index);
+        while (true) {
+            int bonusIndex = r.nextInt(HIGHEST_INDEX);
+            if (playfield.charAt(bonusIndex) == SPACE) {
+                placeChar(BONUS, bonusIndex);
                 break;
             }
         }
 
-        return null;
+        for (int i = 0; i < enemyTypes.length; i++) {
+            Enemy e = enemyTypes[i];
+            int index = r.nextInt(HIGHEST_INDEX);
+            if (playfield.charAt(index) == SPACE){
+                placeChar(e.getSymbol(), index);
+                e.setIndex(index);
+                e.setHp(difficulty.hp());
+                e.setArmor(difficulty.armor());
+                e.setWeapon(gameFactory.giveWeapon(e));
+                enemies.add(e);
+            } else {
+                i--;
+            }
+        }
     }
 
 
     private static void createPlayfield() {
         //TODO: ECKEN AUSFÜLLEN DAMIT MAN NICHT DURCH ECKEN GEHEN KANN
         playfield = """
-                ########################################
-                # @                                    #
-                # #    #    #    #    #    #    #    # #
-                # ########  #### #### #### #### ########
-                #      #    #    #    #    #    #    # #
-                ###### #    ######    ######    #### # #
-                # #    #    #    ## ###    #    #    # #
-                # ############## #### #### # ####### # #
-                #                                      #
-                # #### #### #### #### ############## # #
-                # #    #    #    #    #         #    # #
-                # ###  #### ###  #### #         ###### #
-                # #    #    #    #    #         #    # #
-                # #### #    #### #    ####      ###### #
-                # #    #         #    #    S           #
-                ########################################
+                #######################################
+                # @                                   #
+                # #    #    #    #    #    #    #    ##
+                # ########  #### #### #### #### #######
+                #      #    #    #    #    #    #    ##
+                ###### #    ######    ######    #### ##
+                # #    #    #    ## ###    #    #    ##
+                # ############## #### #### # ####### ##
+                #                                     #
+                # #### #### #### #### ############## ##
+                # #    #    #    #    #         #    ##
+                # ###  #### ###  #### #         #######
+                # #    #    #    #    #         #    ##
+                # #### #    #### #    ####      #######
+                # #    #         #    #    S          #
+                #######################################
                 """;
-
+        spawnEntities();
     }
 
     private static void selectDifficulty() {
-        DifficultyFactory df = new DifficultyFactory();
+
         do {
             System.out.println("Select a difficulty between 1 and 3");
             int dif = Integer.parseInt(systemScanner.next());
-            difficulty= df.getDifficulty(dif);
+            difficulty = gameFactory.getDifficulty(dif);
 
-        }while (difficulty == null);
+        } while (difficulty == null);
     }
-    
-    private static void replaceChar(char symbol, int index){
-        playfield = String.valueOf(playfield.toCharArray()[index] = symbol);
+
+    private static void moveChar(char symbol, int newIndex, int oldIndex) {
+        char[] playfieldArr = playfield.toCharArray();
+
+        playfieldArr[newIndex] = symbol;
+        playfieldArr[oldIndex] = SPACE;
+        playfield = String.valueOf(playfieldArr);
+    }
+
+    private static void placeChar(char symbol, int newIndex) {
+        char[] playfieldArr = playfield.toCharArray();
+
+        playfieldArr[newIndex] = symbol;
+        playfield = String.valueOf(playfieldArr);
     }
 }

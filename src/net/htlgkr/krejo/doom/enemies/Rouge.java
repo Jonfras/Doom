@@ -7,4 +7,8 @@ public final class Rouge extends Enemy {
     public Rouge(double hp, Weapon weapon, double armor) {
         super(hp, weapon, armor, 'B');
     }
+
+    public Rouge() {
+        super('R');
+    }
 }

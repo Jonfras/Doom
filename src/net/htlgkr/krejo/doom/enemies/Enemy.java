@@ -6,6 +6,8 @@ import net.htlgkr.krejo.doom.weapons.Weapon;
 
 public sealed abstract class Enemy extends Entity  permits Rouge, Wizard, Dwarf, Elf {
 
+    private char symbol;
+
 
 
     private int index = -1;
@@ -14,8 +16,8 @@ public sealed abstract class Enemy extends Entity  permits Rouge, Wizard, Dwarf,
         super(hp, weapon, armor, symbol);
     }
 
-    public Enemy(){
-
+    public Enemy(char symbol){
+        this.symbol = symbol;
     }
 
     public Enemy(int index){
@@ -31,4 +33,7 @@ public sealed abstract class Enemy extends Entity  permits Rouge, Wizard, Dwarf,
         this.index = index;
     }
 
+    public char getSymbol() {
+        return symbol;
+    }
 }

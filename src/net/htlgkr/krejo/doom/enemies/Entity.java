@@ -25,9 +25,11 @@ public sealed abstract class Entity permits Enemy, Player {
         return hp;
     }
 
-    public void setHp(int takenDamage) {
-        this.hp = this.hp - takenDamage * armor;
+    public void setHp(int hp) {
+        this.hp = hp;
     }
+
+    //TODO: IMPLEMENT THE TAKE DAMAGE METHOD
 
     public Weapon getWeapon() {
         return weapon;
@@ -41,7 +43,7 @@ public sealed abstract class Entity permits Enemy, Player {
         return armor;
     }
 
-    public void setArmor(int armor) {
+    public void setArmor(double armor) {
         this.armor = armor;
     }
 

@@ -6,4 +6,8 @@ public sealed class Wizard extends Enemy permits UndeadWizard, HardWizard{
     public Wizard(double hp, Weapon weapon, double armor, char symbol) {
         super(hp, weapon, armor, symbol);
     }
+
+    public Wizard(char symbol) {
+        super(symbol);
+    }
 }

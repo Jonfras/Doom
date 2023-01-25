@@ -9,5 +9,7 @@ public final class Dwarf extends Enemy {
     }
 
 
-
+    public Dwarf() {
+        super('D');
+    }
 }

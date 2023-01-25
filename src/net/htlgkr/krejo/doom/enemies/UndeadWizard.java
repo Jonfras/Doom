@@ -6,4 +6,8 @@ public final class UndeadWizard extends Wizard {
     public UndeadWizard(double hp, Weapon weapon, double armor) {
         super(hp, weapon, armor, 'U');
     }
+
+    public UndeadWizard() {
+        super('U');
+    }
 }
