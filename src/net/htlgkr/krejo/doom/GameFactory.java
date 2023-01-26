@@ -2,6 +2,7 @@ package net.htlgkr.krejo.doom;
 
 import net.htlgkr.krejo.doom.enemies.Difficulty;
 import net.htlgkr.krejo.doom.enemies.Enemy;
+import net.htlgkr.krejo.doom.enemies.Player;
 import net.htlgkr.krejo.doom.weapons.*;
 
 import java.util.Random;
@@ -12,6 +13,7 @@ public class GameFactory {
     private static final String BASIC_PREFIX = "Starter-";
     private static final String ADVANCED_PREFIX = "Hero-";
     private static final String EXPERT_PREFIX = "Holy-";
+    private static final String UPGRADED_PREFIX = "Upgraded-";
 
     Difficulty difficulty;
     public Difficulty getDifficulty(int dif){
@@ -60,4 +62,30 @@ public class GameFactory {
            default -> throw new IllegalStateException("Unexpected value: " + difficulty.hp());
        };
     }
+
+    public Player getBonus(Player p) {
+
+        return switch (difficulty.hp()){
+            case 10 -> new Player(p.getHp()+10,
+                    new Weapon(UPGRADED_PREFIX + p.getWeapon().getDescription(), p.getWeapon().getDamage() + 3),
+                    p.getArmor()-0.3,
+                    p.getIndex());
+
+            case 20 -> new Player(p.getHp()+15,
+                    new Weapon(UPGRADED_PREFIX + p.getWeapon().getDescription(), p.getWeapon().getDamage() + 5),
+                    new Weapon(ADVANCED_PREFIX + "Bow", 5),
+                    p.getArmor()-0.5,
+                    p.getIndex());
+
+            case 40 -> new Player(p.getHp()+23,
+                    new Weapon(UPGRADED_PREFIX + p.getWeapon().getDescription(), p.getWeapon().getDamage() + 8),
+                    new Weapon(ADVANCED_PREFIX + "Bow", 10),
+                    p.getArmor()-0.7,
+                    p.getIndex());
+
+            default -> throw new IllegalStateException("Unexpected value: " + difficulty.hp());
+        };
+    }
+
+
 }

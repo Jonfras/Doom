@@ -25,7 +25,7 @@ public sealed abstract class Entity permits Enemy, Player {
         return hp;
     }
 
-    public void setHp(int hp) {
+    public void setHp(double hp) {
         this.hp = hp;
     }
 

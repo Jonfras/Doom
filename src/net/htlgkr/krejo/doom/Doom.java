@@ -4,6 +4,7 @@ import net.htlgkr.krejo.doom.enemies.*;
 import net.htlgkr.krejo.doom.weapons.Sword;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Doom {
 
@@ -15,10 +16,11 @@ public class Doom {
     private static final int HIGHEST_INDEX = 639;
 
     private static final char PLAYER = '@';
-    private static final char ENEMY = 'X';
+    private static final List<Character> ENEMIES = List.of('D', 'E', 'H', 'U', 'R');
     private static final char SPACE = ' ';
     private static final char TREASURE = 'S';
     private static final char BONUS = 'B';
+    private static final char WALL = '#';
 
     static GameFactory gameFactory = new GameFactory();
     private static Difficulty difficulty;
@@ -71,7 +73,7 @@ public class Doom {
         System.out.println(playfield);
         do {
             System.out.println("Enter ? if you want to see the possible moves again.");
-            String nextInput = systemScanner.next();
+            String nextInput = systemScanner.nextLine();
             if (nextInput.equals("?")) {
                 showActions();
             } else {
@@ -92,23 +94,33 @@ public class Doom {
     }
 
 
+
     private static void makeMove(MoveToPosition nextMove) throws RuntimeException {
         if (nextMove.isValidMove()) {
             if (nextMove.getValueOfPosition() == 'F') {
                 fight();
+            }else if (nextMove.getValueOfPosition() == BONUS){
+                getBonus();
             } else {
                 rewritePlayfield(nextMove);
             }
+        } else {
+            moveEnemies(playfield.toCharArray());
         }
     }
 
     private static void fight() throws RuntimeException {
+        System.out.println("Fighting Phase:");
+        printStats(player);
         int playerX = (int) Math.floor(player.getIndex() % WIDTH);
         int playerY = (int) Math.floor(player.getIndex() / WIDTH);
         for (int i = 0; i < enemies.size(); i++) {
             Enemy enemy = enemies.get(i);
             if (enemy.getIndex() / 40 - playerY < 2 && enemy.getIndex() / 40 - playerY > -2 ||
                     enemy.getIndex() % 40 - playerX < 2 && enemy.getIndex() % 40 - playerX > -2) {
+                printStats(enemy);
+                System.out.println("What weapon do you want to use?");
+
                 enemy.setHp(player.getWeapon().getDamage());
                 if (enemy.getHp() < 1) {
                     enemies.remove(i);
@@ -135,7 +147,7 @@ public class Doom {
 
     }
 
-    private static MoveToPosition checkInput(String input) throws IllegalStateException {
+    private static MoveToPosition checkInput(String input) throws IllegalStateException{
 //TODO: Mocha dass ma ned in enemies einegeh ko
         if (actions.contains(input.toUpperCase())) {
 
@@ -167,12 +179,16 @@ public class Doom {
 
                 case WEST -> fieldsAroundPlayer.get(7);
 
+
                 case FIGHT -> {
-                    if (fieldsAroundPlayer.stream().anyMatch(x -> ENEMY == x.getValueOfPosition())) {
-                        yield new MoveToPosition('F', playfield.indexOf(PLAYER));
-                    } else {
-                        yield new MoveToPosition('0', playfield.indexOf((PLAYER)));
+                    System.out.println("fieldsAroundPlayer that are not space or wall:");
+                    for (MoveToPosition moveToPosition :
+                            fieldsAroundPlayer) {
+                        if (ENEMIES.contains(moveToPosition.getValueOfPosition())){
+                            yield new MoveToPosition('F', playfield.indexOf(PLAYER));
+                        }
                     }
+                        yield new MoveToPosition('0', playfield.indexOf((PLAYER)));
                 }
 
                 default -> new MoveToPosition('0', playfield.indexOf((PLAYER)));
@@ -194,6 +210,26 @@ public class Doom {
         return null;
     }
 
+
+    private static void getBonus() {
+        System.out.println("Bonus Chest contained: ");
+        player = gameFactory.getBonus(player);
+        printStats(player);
+    }
+
+    private static void printStats(Entity entity) {
+        if (entity instanceof Player){
+            System.out.println("----------Your stats----------");
+        } else {
+            System.out.println("----------Enemy stats----------");
+        }
+        System.out.println("HP: " + entity.getHp());
+        System.out.println("Weapon: " + entity.getWeapon());
+        System.out.println("Damage: " + entity.getWeapon().getDamage());
+        System.out.println("Armor: " + entity.getArmor());
+    }
+
+
     private static void win() {
         System.out.println("Congrats!!! You got the treasure!");
         System.exit(1234);
@@ -211,6 +247,9 @@ public class Doom {
             int randomInt = r.nextInt(7);
             Enemy enemy = enemies.get(i);
             int nextIndex = enemy.getIndex() + values.get(randomInt);
+            if (enemy.getSymbol() == 'R'){
+                nextIndex = enemy.getIndex() + (values.get(randomInt)*2);
+            }
             if (playfieldArr[nextIndex] == SPACE) {
                 moveChar(enemy.getSymbol(), nextIndex, enemy.getIndex());
                 enemies.get(i).setIndex(nextIndex);
@@ -275,12 +314,12 @@ public class Doom {
                 # #    #    #    ## ###    #    #    ##
                 # ############## #### #### # ####### ##
                 #                                     #
-                # #### #### #### #### ############## ##
-                # #    #    #    #    #         #    ##
-                # ###  #### ###  #### #         #######
-                # #    #    #    #    #         #    ##
-                # #### #    #### #    ####      #######
-                # #    #         #    #    S          #
+                # ######### #### #### ############## ##
+                # #         #    #    #         #    ##
+                # ###  #### ###  #### #         ## ####
+                # #    #              #         #    ##
+                # #### #    #### #########      #######
+                # #                        S          #
                 #######################################
                 """;
         spawnEntities();
@@ -290,9 +329,13 @@ public class Doom {
 
         do {
             System.out.println("Select a difficulty between 1 and 3");
-            int dif = Integer.parseInt(systemScanner.next());
-            difficulty = gameFactory.getDifficulty(dif);
-
+            try {
+                int dif = Integer.parseInt(systemScanner.next());
+                difficulty = gameFactory.getDifficulty(dif);
+            } catch (NumberFormatException e) {
+                System.err.println("Enter a valid number");
+                difficulty = null;
+            }
         } while (difficulty == null);
     }
 
