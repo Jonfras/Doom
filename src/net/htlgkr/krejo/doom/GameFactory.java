@@ -5,7 +5,7 @@ import net.htlgkr.krejo.doom.enemies.Enemy;
 import net.htlgkr.krejo.doom.enemies.Player;
 import net.htlgkr.krejo.doom.weapons.*;
 
-import java.util.Random;
+import java.util.List;
 
 public class GameFactory {
 
@@ -66,22 +66,42 @@ public class GameFactory {
     public Player getBonus(Player p) {
 
         return switch (difficulty.hp()){
-            case 10 -> new Player(p.getHp()+10,
-                    new Weapon(UPGRADED_PREFIX + p.getWeapon().getDescription(), p.getWeapon().getDamage() + 3),
-                    p.getArmor()-0.3,
-                    p.getIndex());
+            case 10 -> {
+                Player upgradedPlayer = new Player(p.getHp() + 10,
+                        p.getPrimaryWeapon(),
+                        p.getArmor() - 0.3,
+                        p.getIndex());
 
-            case 20 -> new Player(p.getHp()+15,
-                    new Weapon(UPGRADED_PREFIX + p.getWeapon().getDescription(), p.getWeapon().getDamage() + 5),
-                    new Weapon(ADVANCED_PREFIX + "Bow", 5),
-                    p.getArmor()-0.5,
-                    p.getIndex());
+                upgradedPlayer.getPrimaryWeapon().setDescription(UPGRADED_PREFIX + p.getPrimaryWeapon().getDescription());
+                upgradedPlayer.getPrimaryWeapon().setDamage(p.getPrimaryWeapon().getDamage() + 3);
+                upgradedPlayer.setWeapons(p.getWeapons());
 
-            case 40 -> new Player(p.getHp()+23,
-                    new Weapon(UPGRADED_PREFIX + p.getWeapon().getDescription(), p.getWeapon().getDamage() + 8),
-                    new Weapon(ADVANCED_PREFIX + "Bow", 10),
-                    p.getArmor()-0.7,
-                    p.getIndex());
+                yield upgradedPlayer;
+            }
+            case 20 ->{
+                Player upgradedPlayer = new Player(p.getHp() + 15,
+                        p.getPrimaryWeapon(),
+                        p.getArmor() - 0.5,
+                        p.getIndex());
+
+                upgradedPlayer.getPrimaryWeapon().setDescription(UPGRADED_PREFIX + p.getPrimaryWeapon().getDescription());
+                upgradedPlayer.getPrimaryWeapon().setDamage(p.getPrimaryWeapon().getDamage() + 5);
+                upgradedPlayer.setWeapons(p.getWeapons());
+
+                yield upgradedPlayer;
+            }
+            case 40 -> {
+                Player upgradedPlayer = new Player(p.getHp() + 20,
+                        p.getPrimaryWeapon(),
+                        p.getArmor() - 0.7,
+                        p.getIndex());
+
+                upgradedPlayer.getPrimaryWeapon().setDescription(UPGRADED_PREFIX + p.getPrimaryWeapon().getDescription());
+                upgradedPlayer.getPrimaryWeapon().setDamage(p.getPrimaryWeapon().getDamage() + 8);
+                upgradedPlayer.setWeapons(p.getWeapons());
+
+                yield upgradedPlayer;
+            }
 
             default -> throw new IllegalStateException("Unexpected value: " + difficulty.hp());
         };

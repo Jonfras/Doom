@@ -10,4 +10,9 @@ public non-sealed class HardWizard extends Wizard {
     public HardWizard() {
         super('H');
     }
+
+    @Override
+    public String toString() {
+        return "Hard Wizard";
+    }
 }

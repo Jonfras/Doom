@@ -1,10 +1,10 @@
 package net.htlgkr.krejo.doom;
 
 import net.htlgkr.krejo.doom.enemies.*;
+import net.htlgkr.krejo.doom.weapons.Hammer;
 import net.htlgkr.krejo.doom.weapons.Sword;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Doom {
 
@@ -27,9 +27,9 @@ public class Doom {
 
     private static String playfield;
 
-    private static final int NUMBER_OF_ENEMIES = 5;
+    private static final int NUMBER_OF_ENEMIES = 1;
 
-    private static Player player = new Player(1, new Sword("Starter-Sword", 4), 0.5D, 42);
+    private static Player player = new Player(10, new Sword("Starter-Sword", 4), 0.99D, 42);
 
     private static final Enemy[] enemyTypes = {new Dwarf(), new Elf(), new HardWizard(), new UndeadWizard(), new Rouge()};
 
@@ -70,10 +70,11 @@ public class Doom {
         selectDifficulty();
         createPlayfield();
         showActions();
+        printStats(player);
         System.out.println(playfield);
         do {
             System.out.println("Enter ? if you want to see the possible moves again.");
-            String nextInput = systemScanner.nextLine();
+            String nextInput = systemScanner.next();
             if (nextInput.equals("?")) {
                 showActions();
             } else {
@@ -94,12 +95,11 @@ public class Doom {
     }
 
 
-
     private static void makeMove(MoveToPosition nextMove) throws RuntimeException {
         if (nextMove.isValidMove()) {
             if (nextMove.getValueOfPosition() == 'F') {
                 fight();
-            }else if (nextMove.getValueOfPosition() == BONUS){
+            } else if (nextMove.getValueOfPosition() == BONUS) {
                 getBonus();
             } else {
                 rewritePlayfield(nextMove);
@@ -111,31 +111,67 @@ public class Doom {
 
     private static void fight() throws RuntimeException {
         System.out.println("Fighting Phase:");
-        printStats(player);
+
+
         int playerX = (int) Math.floor(player.getIndex() % WIDTH);
         int playerY = (int) Math.floor(player.getIndex() / WIDTH);
+
         for (int i = 0; i < enemies.size(); i++) {
             Enemy enemy = enemies.get(i);
+
             if (enemy.getIndex() / 40 - playerY < 2 && enemy.getIndex() / 40 - playerY > -2 ||
                     enemy.getIndex() % 40 - playerX < 2 && enemy.getIndex() % 40 - playerX > -2) {
-                printStats(enemy);
-                System.out.println("What weapon do you want to use?");
 
-                enemy.setHp(player.getWeapon().getDamage());
-                if (enemy.getHp() < 1) {
-                    enemies.remove(i);
-                    char[] playfieldArr = playfield.toCharArray();
-                    playfieldArr[enemy.getIndex()] = SPACE;
-                    playfield = String.valueOf(playfieldArr);
-                } else {
-                    player.setHp(enemy.getWeapon().getDamage());
-                    if (player.getHp() < 1) {
-                        loose();
+                printStats(player);
+                System.out.println();
+                printStats(enemy);
+                do {
+                    //show Fighting Menu:
+
+                    if (player.getWeapons().size() > 1) {
+                        getFightingWeapon();
+                        player.switchPrimaryWeapon(i);
                     }
-                }
+
+                    enemy.takeDamage(player.getPrimaryWeapon());
+
+                    try {
+                        System.out.print("Fighting");
+                        Thread.sleep(2000);
+                        System.out.print(".");
+                        Thread.sleep(2000);
+                        System.out.print(".");
+                        Thread.sleep(2000);
+                        System.out.println(".");
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    if (enemy.getHp() < 1) {
+                        enemies.remove(i);
+                        placeChar(SPACE, enemy.getIndex());
+                        System.out.println("You won against "+ enemy.toString() +  "!");
+                        System.out.println();
+                        printStats(player);
+                        break;
+
+                    } else {
+                        player.takeDamage(enemy.getPrimaryWeapon());
+                        if (player.getHp() < 1) {
+                            loose();
+                        }
+                    }
+                    System.out.println();
+                    printStats(player);
+                    System.out.println();
+                    printStats(enemy);
+                    System.out.println();
+
+                } while (enemy.getHp() > 0 || player.getHp() > 0);
             }
         }
     }
+
 
     private static void rewritePlayfield(MoveToPosition nextMove) {
 
@@ -147,7 +183,7 @@ public class Doom {
 
     }
 
-    private static MoveToPosition checkInput(String input) throws IllegalStateException{
+    private static MoveToPosition checkInput(String input) throws IllegalStateException {
 //TODO: Mocha dass ma ned in enemies einegeh ko
         if (actions.contains(input.toUpperCase())) {
 
@@ -184,17 +220,17 @@ public class Doom {
                     System.out.println("fieldsAroundPlayer that are not space or wall:");
                     for (MoveToPosition moveToPosition :
                             fieldsAroundPlayer) {
-                        if (ENEMIES.contains(moveToPosition.getValueOfPosition())){
+                        if (ENEMIES.contains(moveToPosition.getValueOfPosition())) {
                             yield new MoveToPosition('F', playfield.indexOf(PLAYER));
                         }
                     }
-                        yield new MoveToPosition('0', playfield.indexOf((PLAYER)));
+                    yield new MoveToPosition('0', playfield.indexOf((PLAYER)));
                 }
 
                 default -> new MoveToPosition('0', playfield.indexOf((PLAYER)));
             };
 
-            if (nextPosition.getValueOfPosition() == 'F' || nextPosition.getValueOfPosition() == SPACE) {
+            if (nextPosition.getValueOfPosition() == 'F' || nextPosition.getValueOfPosition() == SPACE || nextPosition.getValueOfPosition() == BONUS) {
                 nextPosition.setValidMove(true);
                 return nextPosition;
             } else if (nextPosition.getValueOfPosition() == TREASURE) {
@@ -215,18 +251,34 @@ public class Doom {
         System.out.println("Bonus Chest contained: ");
         player = gameFactory.getBonus(player);
         printStats(player);
+        placeChar(SPACE, playfield.indexOf(BONUS));
     }
 
     private static void printStats(Entity entity) {
-        if (entity instanceof Player){
+        if (entity instanceof Player) {
             System.out.println("----------Your stats----------");
         } else {
             System.out.println("----------Enemy stats----------");
         }
         System.out.println("HP: " + entity.getHp());
-        System.out.println("Weapon: " + entity.getWeapon());
-        System.out.println("Damage: " + entity.getWeapon().getDamage());
+        System.out.println("Weapon: " + entity.getPrimaryWeapon());
+        System.out.println("Damage: " + entity.getPrimaryWeapon().getDamage());
         System.out.println("Armor: " + entity.getArmor());
+    }
+
+    private static int getFightingWeapon() {
+        int numberOfWeapon;
+        System.out.println("What weapon do you want to use? Enter the number of the Weapon:");
+
+        for (int j = 0; j < player.getWeapons().size(); j++) {
+            System.out.println(j + " " + player.getWeapons().get(j).getDescription());
+        }
+        do {
+            numberOfWeapon = Integer.parseInt(systemScanner.next());
+        } while (numberOfWeapon < 0 || numberOfWeapon >= player.getWeapons().size());
+
+        return numberOfWeapon;
+
     }
 
 
@@ -247,8 +299,8 @@ public class Doom {
             int randomInt = r.nextInt(7);
             Enemy enemy = enemies.get(i);
             int nextIndex = enemy.getIndex() + values.get(randomInt);
-            if (enemy.getSymbol() == 'R'){
-                nextIndex = enemy.getIndex() + (values.get(randomInt)*2);
+            if (enemy.getSymbol() == 'R') {
+                nextIndex = enemy.getIndex() + (values.get(randomInt) * 2);
             }
             if (playfieldArr[nextIndex] == SPACE) {
                 moveChar(enemy.getSymbol(), nextIndex, enemy.getIndex());
@@ -285,10 +337,10 @@ public class Doom {
             }
         }
 
-        for (int i = 0; i < enemyTypes.length; i++) {
+        for (int i = 0; i < NUMBER_OF_ENEMIES; i++) {
             Enemy e = enemyTypes[i];
             int index = r.nextInt(HIGHEST_INDEX);
-            if (playfield.charAt(index) == SPACE){
+            if (playfield.charAt(index) == SPACE) {
                 placeChar(e.getSymbol(), index);
                 e.setIndex(index);
                 e.setHp(difficulty.hp());
@@ -306,22 +358,24 @@ public class Doom {
         //TODO: ECKEN AUSFÜLLEN DAMIT MAN NICHT DURCH ECKEN GEHEN KANN
         playfield = """
                 #######################################
-                # @                                   #
-                # #    #    #    #    #    #    #    ##
-                # ########  #### #### #### #### #######
-                #      #    #    #    #    #    #    ##
-                ###### #    ######    ######    #### ##
-                # #    #    #    ## ###    #    #    ##
-                # ############## #### #### # ####### ##
+                #               @                     #
+                #      B                             ##
                 #                                     #
-                # ######### #### #### ############## ##
-                # #         #    #    #         #    ##
-                # ###  #### ###  #### #         ## ####
-                # #    #              #         #    ##
-                # #### #    #### #########      #######
-                # #                        S          #
+                #                                     #
+                #                                     #
+                #                                     #
+                #                                     #
+                #                                     #
+                #                                     #
+                #                                     #
+                #                                    ##
+                #                                     #
+                #                                     #
+                #                          S          #
                 #######################################
                 """;
+//        enemies.add(new Dwarf(20.0, new Hammer("gummi hammer", 1), 1));
+//        enemies.get(0).setIndex(playfield.indexOf('D'));
         spawnEntities();
     }
 
@@ -353,4 +407,5 @@ public class Doom {
         playfieldArr[newIndex] = symbol;
         playfield = String.valueOf(playfieldArr);
     }
+
 }

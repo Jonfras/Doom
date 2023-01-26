@@ -11,8 +11,32 @@ Elfbar: Geschmack
 
 
 enemies:
-Dwarf: can use sword, hammer			        	Symbol: D
-Elf: uses Claw or Elfbar			            	Symbol: E
-HardWizard: ?						                Symbol: H
-Rouge: only can use Claw but moves two squares		Symbol: R
-UndeadWizard: uses wand				            	Symbol: U
+Dwarf: can use sword, hammer				    Symbol: D
+Elf: uses Elfbar          				        Symbol: E
+HardWizard: ?						            Symbol: H
+Rouge: only can use Claw but moves two squars	Symbol: R
+UndeadWizard: uses wand					        Symbol: U
+
+
+//TODO: 2 mal zeilenumbruch am anfang von fight und einmal nach enemy stats
+//
+
+
+playfield = """
+                #######################################
+                #               @    D                #
+                #      B                             ##
+                ##### #### ##### ######### ###  ### ###
+                #      #    #    #    #    #    #    ##
+                ###### #    ######    ######    #### ##
+                # #    #    #    ## ###    #    #    ##
+                # ############## #### #### # ####### ##
+                #                                     #
+                # ######### #### #### ############## ##
+                # #         #    #    #         #    ##
+                # ###  #### ###  #### #         ## ####
+                # #    #              #         #    ##
+                # #### #    #### #########      #######
+                # #                        S          #
+                #######################################
+                """;

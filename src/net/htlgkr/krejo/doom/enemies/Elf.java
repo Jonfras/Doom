@@ -1,5 +1,6 @@
 package net.htlgkr.krejo.doom.enemies;
 
+import net.htlgkr.krejo.doom.weapons.Hammer;
 import net.htlgkr.krejo.doom.weapons.Weapon;
 
 public final class Elf extends Enemy {
@@ -9,5 +10,10 @@ public final class Elf extends Enemy {
 
     public Elf() {
         super('E');
+    }
+
+    @Override
+    public String toString() {
+        return "Elf";
     }
 }

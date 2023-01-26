@@ -36,4 +36,5 @@ public sealed abstract class Enemy extends Entity  permits Rouge, Wizard, Dwarf,
     public char getSymbol() {
         return symbol;
     }
+
 }

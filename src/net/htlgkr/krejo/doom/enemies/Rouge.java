@@ -11,4 +11,9 @@ public final class Rouge extends Enemy {
     public Rouge() {
         super('R');
     }
+
+    @Override
+    public String toString() {
+        return "Rogue";
+    }
 }

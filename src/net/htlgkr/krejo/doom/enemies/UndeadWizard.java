@@ -10,4 +10,9 @@ public final class UndeadWizard extends Wizard {
     public UndeadWizard() {
         super('U');
     }
+
+    @Override
+    public String toString() {
+        return "Undead Wizard";
+    }
 }

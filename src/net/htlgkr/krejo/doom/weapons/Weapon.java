@@ -23,4 +23,12 @@ public sealed class Weapon permits Sword, Bow, Dagger, Wand, Hammer, Claw, Elfba
         this.damage = damage;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return description;
+    }
 }
