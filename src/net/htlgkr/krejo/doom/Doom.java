@@ -27,9 +27,12 @@ public class Doom {
 
     private static String playfield;
 
-    private static final int NUMBER_OF_ENEMIES = 1;
+    private static final int NUMBER_OF_ENEMIES = 5;
 
     private static Player player = new Player(10, new Sword("Starter-Sword", 4), 0.99D, 42);
+    static {
+        player.addWeaponToInventory(new Hammer("Hero-Hammer", 20));
+    }
 
     private static final Enemy[] enemyTypes = {new Dwarf(), new Elf(), new HardWizard(), new UndeadWizard(), new Rouge()};
 
@@ -87,7 +90,7 @@ public class Doom {
                 } catch (IllegalStateException e) {
                     System.err.println("Please enter a valid move");
                 } catch (RuntimeException r) {
-                    System.err.println("No one wants to fight");
+                    throw new RuntimeException();
                 }
             }
 
@@ -113,14 +116,13 @@ public class Doom {
         System.out.println("Fighting Phase:");
 
 
-        int playerX = (int) Math.floor(player.getIndex() % WIDTH);
-        int playerY = (int) Math.floor(player.getIndex() / WIDTH);
+//        int playerX = (int) Math.floor(player.getIndex() % WIDTH);
+//        int playerY = (int) Math.floor(player.getIndex() / WIDTH);
 
         for (int i = 0; i < enemies.size(); i++) {
             Enemy enemy = enemies.get(i);
 
-            if (enemy.getIndex() / 40 - playerY < 2 && enemy.getIndex() / 40 - playerY > -2 ||
-                    enemy.getIndex() % 40 - playerX < 2 && enemy.getIndex() % 40 - playerX > -2) {
+            if (isEnemyAround(enemy)) {
 
                 printStats(player);
                 System.out.println();
@@ -129,8 +131,10 @@ public class Doom {
                     //show Fighting Menu:
 
                     if (player.getWeapons().size() > 1) {
-                        getFightingWeapon();
-                        player.switchPrimaryWeapon(i);
+                        int index = getFightingWeapon();
+                        if (index != 0) {
+                            player.switchPrimaryWeapon(index);
+                        }
                     }
 
                     enemy.takeDamage(player.getPrimaryWeapon());
@@ -150,7 +154,7 @@ public class Doom {
                     if (enemy.getHp() < 1) {
                         enemies.remove(i);
                         placeChar(SPACE, enemy.getIndex());
-                        System.out.println("You won against "+ enemy.toString() +  "!");
+                        System.out.println("You won against "+ enemy +  "!");
                         System.out.println();
                         printStats(player);
                         break;
@@ -170,6 +174,23 @@ public class Doom {
                 } while (enemy.getHp() > 0 || player.getHp() > 0);
             }
         }
+    }
+
+    private static boolean isEnemyAround(Enemy enemy) {
+        int idx = player.getIndex();
+        if (idx + NW == enemy.getIndex() ||
+            idx + N  == enemy.getIndex() ||
+            idx + NE == enemy.getIndex() ||
+            idx + E  == enemy.getIndex() ||
+            idx + SE == enemy.getIndex() ||
+            idx + S  == enemy.getIndex() ||
+            idx + SW == enemy.getIndex() ||
+            idx + W  == enemy.getIndex()) {
+
+                return true;
+        }
+
+        return false;
     }
 
 
@@ -217,7 +238,6 @@ public class Doom {
 
 
                 case FIGHT -> {
-                    System.out.println("fieldsAroundPlayer that are not space or wall:");
                     for (MoveToPosition moveToPosition :
                             fieldsAroundPlayer) {
                         if (ENEMIES.contains(moveToPosition.getValueOfPosition())) {
@@ -251,6 +271,7 @@ public class Doom {
         System.out.println("Bonus Chest contained: ");
         player = gameFactory.getBonus(player);
         printStats(player);
+        //TODO: ondane chest irgendwo platzieren nachn öffnen
         placeChar(SPACE, playfield.indexOf(BONUS));
     }
 
@@ -271,10 +292,16 @@ public class Doom {
         System.out.println("What weapon do you want to use? Enter the number of the Weapon:");
 
         for (int j = 0; j < player.getWeapons().size(); j++) {
-            System.out.println(j + " " + player.getWeapons().get(j).getDescription());
+            System.out.println(j + "..." + player.getWeapons().get(j).getDescription());
         }
         do {
-            numberOfWeapon = Integer.parseInt(systemScanner.next());
+            try {
+                numberOfWeapon = Integer.parseInt(systemScanner.next());
+            } catch (NumberFormatException e) {
+                System.out.println("Enter a valid number");
+                numberOfWeapon = -1;
+            }
+
         } while (numberOfWeapon < 0 || numberOfWeapon >= player.getWeapons().size());
 
         return numberOfWeapon;
@@ -345,7 +372,7 @@ public class Doom {
                 e.setIndex(index);
                 e.setHp(difficulty.hp());
                 e.setArmor(difficulty.armor());
-                e.setWeapon(gameFactory.giveWeapon(e));
+                e.setPrimaryWeapon(gameFactory.giveWeapon(e));
                 enemies.add(e);
             } else {
                 i--;
@@ -359,7 +386,7 @@ public class Doom {
         playfield = """
                 #######################################
                 #               @                     #
-                #      B                             ##
+                #      B                              #
                 #                                     #
                 #                                     #
                 #                                     #
@@ -368,12 +395,12 @@ public class Doom {
                 #                                     #
                 #                                     #
                 #                                     #
-                #                                    ##
+                #                                     #
                 #                                     #
                 #                                     #
                 #                          S          #
                 #######################################
-                """;
+                """;;
 //        enemies.add(new Dwarf(20.0, new Hammer("gummi hammer", 1), 1));
 //        enemies.get(0).setIndex(playfield.indexOf('D'));
         spawnEntities();

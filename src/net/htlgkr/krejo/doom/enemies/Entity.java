@@ -35,7 +35,7 @@ public sealed abstract class Entity permits Enemy, Player {
         return weapon;
     }
 
-    public void setWeapon(Weapon weapon) {
+    public void setPrimaryWeapon(Weapon weapon) {
         this.weapon = weapon;
     }
 

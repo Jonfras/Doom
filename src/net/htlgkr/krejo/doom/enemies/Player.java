@@ -50,7 +50,9 @@ public final class Player extends Entity {
     public void switchPrimaryWeapon(int index){
         Weapon weapon = weapons.get(0);
         weapons.set(0, weapons.get(index));
+        weapons.remove(index);
         weapons.add(weapon);
+        setPrimaryWeapon(weapons.get(0));
     }
 
     @Override

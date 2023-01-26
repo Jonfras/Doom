@@ -107,5 +107,7 @@ public class GameFactory {
         };
     }
 
+    //TODO: neiche gib ma irgend a woffn methode
+
 
 }
