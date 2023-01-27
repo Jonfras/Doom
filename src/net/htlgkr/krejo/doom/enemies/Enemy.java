@@ -1,5 +1,6 @@
 package net.htlgkr.krejo.doom.enemies;
 
+import net.htlgkr.krejo.doom.MoveToPosition;
 import net.htlgkr.krejo.doom.enemies.Entity;
 import net.htlgkr.krejo.doom.enemies.*;
 import net.htlgkr.krejo.doom.weapons.Weapon;
@@ -36,5 +37,6 @@ public sealed abstract class Enemy extends Entity  permits Rouge, Wizard, Dwarf,
     public char getSymbol() {
         return symbol;
     }
+
 
 }

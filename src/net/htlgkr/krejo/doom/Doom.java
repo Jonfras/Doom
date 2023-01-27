@@ -90,6 +90,7 @@ public class Doom {
                 } catch (IllegalStateException e) {
                     System.err.println("Please enter a valid move");
                 } catch (RuntimeException r) {
+                    System.out.println("test");
                     throw new RuntimeException();
                 }
             }
@@ -98,7 +99,8 @@ public class Doom {
     }
 
 
-    private static void makeMove(MoveToPosition nextMove) throws RuntimeException {
+    private static void makeMove(MoveToPosition nextMove)
+            throws RuntimeException {
         if (nextMove.isValidMove()) {
             if (nextMove.getValueOfPosition() == 'F') {
                 fight();
@@ -108,11 +110,12 @@ public class Doom {
                 rewritePlayfield(nextMove);
             }
         } else {
-            moveEnemies(playfield.toCharArray());
+            moveEnemies();
         }
     }
 
-    private static void fight() throws RuntimeException {
+    private static void fight()
+            throws RuntimeException {
         System.out.println("Fighting Phase:");
 
 
@@ -141,11 +144,11 @@ public class Doom {
 
                     try {
                         System.out.print("Fighting");
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                         System.out.print(".");
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                         System.out.print(".");
-                        Thread.sleep(2000);
+                        Thread.sleep(1000);
                         System.out.println(".");
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
@@ -200,11 +203,12 @@ public class Doom {
 
         player.setIndex(nextMove.getIndexOfPosition());
 
-        moveEnemies(playfield.toCharArray());
+        moveEnemies();
 
     }
 
-    private static MoveToPosition checkInput(String input) throws IllegalStateException {
+    private static MoveToPosition checkInput(String input)
+            throws IllegalStateException {
 //TODO: Mocha dass ma ned in enemies einegeh ko
         if (actions.contains(input.toUpperCase())) {
 
@@ -320,23 +324,37 @@ public class Doom {
     }
 
 
-    private static char[] moveEnemies(char[] playfieldArr) {
+    private static void moveEnemies() {
+        char[] playfieldArr = playfield.toCharArray();
+        Random r = new Random();
+        int randomInt;
+        Enemy enemy;
+
         for (int i = 0; i < enemies.size(); i++) {
-            Random r = new Random();
-            int randomInt = r.nextInt(7);
-            Enemy enemy = enemies.get(i);
-            int nextIndex = enemy.getIndex() + values.get(randomInt);
-            if (enemy.getSymbol() == 'R') {
-                nextIndex = enemy.getIndex() + (values.get(randomInt) * 2);
+
+            randomInt = r.nextInt(7);
+            enemy = enemies.get(i);
+
+            int direction = values.get(randomInt);
+
+            if (enemy.getSymbol() == 'R'){
+                direction *= 2;
+                if (enemy.getIndex() + direction <= 0 || enemy.getIndex() + direction > HIGHEST_INDEX){
+                    System.out.println("schlecht");
+                }
             }
-            if (playfieldArr[nextIndex] == SPACE) {
-                moveChar(enemy.getSymbol(), nextIndex, enemy.getIndex());
-                enemies.get(i).setIndex(nextIndex);
+
+            MoveToPosition nextMove = new MoveToPosition(playfield.charAt(enemy.getIndex() + direction), enemy.getIndex() + direction);
+
+
+            if (nextMove.isValidMoveOnPlayfield(playfieldArr, HIGHEST_INDEX)){
+                moveChar(enemy.getSymbol(), nextMove.getIndexOfPosition(),enemy.getIndex());
+                enemy.setIndex(nextMove.getIndexOfPosition());
+                enemies.set(i, enemy);
             } else {
                 i--;
             }
         }
-        return playfieldArr;
     }
 
 
